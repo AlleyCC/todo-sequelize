@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
     })
     .catch(err => { return res.status(422).json(err) })
 })
+
 //detail
 app.get('/todos/:id', (req, res) => {
   const id = req.params.id
@@ -41,7 +42,7 @@ app.get('/users/login', (req, res)=> {
 })
 
 app.post('/users/login', (req, res)=> {
-  res.send('sending login request.')
+  res.render('index')
 })
 
 //register
@@ -51,10 +52,28 @@ app.get('/users/register', (req, res)=> {
 
 app.post('/users/register', (req, res)=> {
   const { name, email, password, confirmPassword } = req.body
-  User.create({ name, email, password })
+  return User.findOne({ where: { email }})
     .then(user => {
-      res.redirect('/')
-    }) 
+      if (user) {
+    return res.render('register', {
+      name,
+      email,
+      password,
+      confirmPassword
+    })
+  }
+  return bcrypt
+    .genSalt(10)
+    .then(salt => bcrypt.hash(password, salt))
+    .then(hash => {
+      User.create({
+        name,
+        email,
+        password: hash
+      })
+    })
+    .catch(err => console.log(err))
+  }) 
 })
 
 app.listen(PORT, () => {
