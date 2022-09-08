@@ -1,19 +1,34 @@
 const express = require('express')
+const app = express()
+const session = require('express-session')
 const { engine } = require('express-handlebars')
+const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
-const bcrypt = require('bcryptjs')
 
+
+const PORT = 3000
+const usePassport = require('./config/passport')
+const passport = require('passport')
+const bcrypt = require('bcryptjs')
 const db = require('./models')
 const Todo = db.Todo
 const User = db.User
 
-const app = express()
-const PORT = 3000
-
 app.engine('hbs', engine( {defaultLayout: 'main', extname: '.hbs'}))
 app.set('view engine', 'hbs')
-app.use(express.urlencoded({ extended: true }))
+
+
+app.use(session({
+  secret: 'MySecret',
+  resave: false,
+  saveUninitialized: true
+}))
+
+
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
+
+usePassport(app)
 //home
 app.get('/', (req, res) => {
   return Todo.findAll({    //{raw: true, nest: true}: 傳入參數將資料轉換成plain object並排除不需要的資料
@@ -41,9 +56,10 @@ app.get('/users/login', (req, res)=> {
   res.render('login')
 })
 
-app.post('/users/login', (req, res)=> {
-  res.render('index')
-})
+app.post('/users/login', passport.authenticate('local', {
+  failureRedirect: '/users/login',
+  successRedirect: '/'
+}))
 
 //register
 app.get('/users/register', (req, res)=> {
