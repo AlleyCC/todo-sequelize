@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 //home
 app.get('/', (req, res) => {
-  return Todo.findAll({
+  return Todo.findAll({    //{raw: true, nest: true}: 傳入參數將資料轉換成plain object並排除不需要的資料
     raw: true,
     nest: true
   })
@@ -24,6 +24,15 @@ app.get('/', (req, res) => {
       res.render('index', { todos })
     })
     .catch(err => { return res.status(422).json(err) })
+})
+//detail
+app.get('/todos/:id', (req, res) => {
+  const id = req.params.id
+  return Todo.findByPk(id)
+    .then(todo => {
+      return res.render('detail', { todo: todo.toJSON() }) //.toJSON(): 將資料轉換成plain object
+    })
+    .catch(err => console.log(err))
 })
 
 //login
