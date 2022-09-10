@@ -1,11 +1,11 @@
 'use strict';
 const bcrypt = require('bcryptjs');
-const todo = require('../models/todo');
 const SEED_USER= {
   name: 'root',
   email: 'root@example.com',
   password: '12345678'
 }
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert('Users', [{
@@ -29,13 +29,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    /*
-      Add reverting commands here.
-      Return a promise to correctly handle asynchronicity.
-
-      Example:
-      return queryInterface.bulkDelete('People', null, {});
-    */
     return queryInterface.bulkDelete('Todo', null, {})
       .then(() => queryInterface('User', null, {}))
   }
